@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="dailyRollingFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="/tmp/grpc-logs/grpc-lb.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
+		</layout>
+	</appender>
+
+	<root>
+		<priority value="info" />
+		<appender-ref ref="stdout" />
+		<appender-ref ref="dailyRollingFileAppender" />
+	</root>
+
+</log4j:configuration>
