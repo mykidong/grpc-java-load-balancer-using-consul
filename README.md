@@ -4,8 +4,17 @@ This is gRPC Java client-side load balancer, in particular for consul service di
 It can also be used for the static service node list.
 
 # How to use
+First, download and install protoc:
 
-First, generate java classes using protoc:
+    # download protoc compiler.
+    ## for linux.
+    wget https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip;
+ 
+    ## for windows.
+    wget https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-win32.zip;
+
+
+And generate java classes using protoc:
 
     # run protoc command for linux:
     mvn protobuf:test-compile -DprotocExecutable="/usr/local/bin/protoc"
