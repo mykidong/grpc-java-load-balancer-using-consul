@@ -19,7 +19,7 @@ The class of load balance GrpcLoadBalancer looks like this:
 
     GrpcLoadBalancer<R, B, A>
     
-the generated classes are used to construct GrpcLoadBalancer instance.
+The generated classes are used to construct GrpcLoadBalancer instance.
 First generic type of GrpcLoadBalancer is rpc class, the second is blocking stub class, and the third is async stub class.
 
 In the test directory, the generated classes of hello world proto and test client can be seen.
