@@ -66,6 +66,8 @@ public class ConsulNameResolver extends NameResolver {
 
     private void loadServiceNodes() {
         nodes = getServiceNodes(serviceName, uri.getHost(), uri.getPort());
+        log.info("nodes: [" + nodes.size());
+
         if (nodes == null || nodes.size() == 0) {
             log.info("there is no node info for serviceName: [{}]...", serviceName);
             return;
