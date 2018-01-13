@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by mykidong on 2018-01-10.
@@ -29,9 +30,18 @@ public class HelloWorldClientWithNameResolverRunner {
         String serviceName = System.getProperty("serviceName", "service-name");
         String consulHost = System.getProperty("consulHost", "localhost");
         int consulPort = Integer.valueOf(System.getProperty("consulPort", "8500"));
+        boolean ignoreConsul = Boolean.valueOf(System.getProperty("ignoreConsul", "true"));
+        String hostPorts = System.getProperty("hostPorts", "localhost:50051");
+
+        List<String> hostPortsList = null;
+        if(ignoreConsul)
+        {
+            String[] tokens = hostPorts.split(",");
+            hostPortsList = Arrays.asList(tokens);
+        }
 
         // init. client.
-        client = new HelloWorldClientWithNameResolver(serviceName, consulHost, consulPort);
+        client = new HelloWorldClientWithNameResolver(serviceName, consulHost, consulPort, ignoreConsul, hostPortsList);
     }
 
     @Test

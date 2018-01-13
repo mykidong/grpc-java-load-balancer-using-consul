@@ -9,6 +9,8 @@ import io.shunters.grpc.component.proto.helloworld.HelloRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * Created by mykidong on 2018-01-10.
  */
@@ -19,20 +21,25 @@ public class HelloWorldClientWithNameResolver {
     private final GreeterGrpc.GreeterBlockingStub blockingStub;
 
     /**
-     * using consul service discovery.
+     * Consul NameResolver Usage.
      *
-     * @param serviceName
-     * @param consulHost
-     * @param consulPort
+     *
+     * @param serviceName consul service name.
+     * @param consulHost consul agent host.
+     * @param consulPort consul agent port.
+     * @param ignoreConsul if true, consul is not used. instead, the static node list will be used.
+     * @param hostPorts the static node list, for instance, Arrays.asList("host1:port1", "host2:port2")
      */
-    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort) {
+    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, List<String> hostPorts) {
 
         String consulAddr = "consul://" + consulHost + ":" + consulPort;
+
+        int pauseInSeconds = 5;
 
         channel = ManagedChannelBuilder
                 .forTarget(consulAddr)
                 .loadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance())
-                .nameResolverFactory(new ConsulNameResolver.ConsulNameResolverProvider(serviceName, 5))
+                .nameResolverFactory(new ConsulNameResolver.ConsulNameResolverProvider(serviceName, pauseInSeconds, ignoreConsul, hostPorts))
                 .usePlaintext(true)
                 .build();
 

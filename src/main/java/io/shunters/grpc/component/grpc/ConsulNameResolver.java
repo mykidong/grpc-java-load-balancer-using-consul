@@ -29,6 +29,8 @@ public class ConsulNameResolver extends NameResolver {
     private URI uri;
     private String serviceName;
     private int pauseInSeconds;
+    private boolean ignoreConsul;
+    private List<String> hostPorts;
 
     private Listener listener;
 
@@ -36,16 +38,12 @@ public class ConsulNameResolver extends NameResolver {
 
     private ConnectionCheckTimer connectionCheckTimer;
 
-    public ConsulNameResolver(URI uri, String serviceName) {
-        this(uri, serviceName, DEFAULT_PAUSE_IN_SECONDS);
-    }
-
-    public ConsulNameResolver(URI uri, String serviceName, int pauseInSeconds) {
+    public ConsulNameResolver(URI uri, String serviceName, int pauseInSeconds, boolean ignoreConsul, List<String> hostPorts) {
         this.uri = uri;
         this.serviceName = serviceName;
         this.pauseInSeconds = pauseInSeconds;
-
-        log.info("uri: {}, serviceName: {}", uri.toString(), serviceName);
+        this.ignoreConsul = ignoreConsul;
+        this.hostPorts = hostPorts;
 
         // run connection check timer.
         this.connectionCheckTimer = new ConnectionCheckTimer(this, this.pauseInSeconds);
@@ -65,28 +63,47 @@ public class ConsulNameResolver extends NameResolver {
     }
 
     private void loadServiceNodes() {
-        String consulHost = uri.getHost();
-        int consulPort = uri.getPort();
-
-        nodes = getServiceNodes(serviceName, consulHost, consulPort);
-        if (nodes == null || nodes.size() == 0) {
-            log.info("there is no node info for serviceName: [{}]...", serviceName);
-            return;
-        }
-
         List<EquivalentAddressGroup> addrs = new ArrayList<>();
 
-        for (ServiceDiscovery.ServiceNode node : nodes) {
-            String host = node.getHost();
-            int port = node.getPort();
-            log.info("serviceName: [" + serviceName + "], host: [" + host + "], port: [" + port + "]");
+        if(!this.ignoreConsul) {
+            String consulHost = uri.getHost();
+            int consulPort = uri.getPort();
 
-            List<SocketAddress> sockaddrsList = new ArrayList<SocketAddress>();
-            sockaddrsList.add(new InetSocketAddress(host, port));
-            addrs.add(new EquivalentAddressGroup(sockaddrsList));
+            nodes = getServiceNodes(serviceName, consulHost, consulPort);
+            if (nodes == null || nodes.size() == 0) {
+                log.info("there is no node info for serviceName: [{}]...", serviceName);
+                return;
+            }
+
+            for (ServiceDiscovery.ServiceNode node : nodes) {
+                String host = node.getHost();
+                int port = node.getPort();
+                log.info("serviceName: [" + serviceName + "], host: [" + host + "], port: [" + port + "]");
+
+                List<SocketAddress> sockaddrsList = new ArrayList<SocketAddress>();
+                sockaddrsList.add(new InetSocketAddress(host, port));
+                addrs.add(new EquivalentAddressGroup(sockaddrsList));
+            }
+        }
+        else
+        {
+            for(String hostPort : this.hostPorts)
+            {
+                String[] tokens = hostPort.split(":");
+
+                String host = tokens[0];
+                int port = Integer.valueOf(tokens[1]);
+                log.info("static host: [" + host + "], port: [" + port + "]");
+
+                List<SocketAddress> sockaddrsList = new ArrayList<SocketAddress>();
+                sockaddrsList.add(new InetSocketAddress(host, port));
+                addrs.add(new EquivalentAddressGroup(sockaddrsList));
+            }
         }
 
-        this.listener.onAddresses(addrs, Attributes.EMPTY);
+        if(addrs.size() > 0) {
+            this.listener.onAddresses(addrs, Attributes.EMPTY);
+        }
     }
 
     public List<ServiceDiscovery.ServiceNode> getNodes() {
@@ -166,11 +183,15 @@ public class ConsulNameResolver extends NameResolver {
 
         private String serviceName;
         private int pauseInSeconds;
+        private boolean ignoreConsul;
+        private List<String> hostPorts;
 
-        public ConsulNameResolverProvider(String serviceName, int pauseInSeconds)
+        public ConsulNameResolverProvider(String serviceName, int pauseInSeconds, boolean ignoreConsul, List<String> hostPorts)
         {
             this.serviceName = serviceName;
             this.pauseInSeconds = pauseInSeconds;
+            this.ignoreConsul = ignoreConsul;
+            this.hostPorts = hostPorts;
         }
 
         @Override
@@ -186,7 +207,7 @@ public class ConsulNameResolver extends NameResolver {
         @Nullable
         @Override
         public NameResolver newNameResolver(URI uri, Attributes attributes) {
-            return new ConsulNameResolver(uri, serviceName, pauseInSeconds);
+            return new ConsulNameResolver(uri, serviceName, pauseInSeconds, this.ignoreConsul, this.hostPorts);
         }
 
         @Override
