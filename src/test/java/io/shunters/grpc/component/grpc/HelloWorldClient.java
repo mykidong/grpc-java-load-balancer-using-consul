@@ -27,7 +27,6 @@ public class HelloWorldClient {
         lb = new GrpcLoadBalancer<>(serviceName, consulHost, consulPort, GreeterGrpc.class);
     }
 
-
     /**
      * using static node list.
      *
