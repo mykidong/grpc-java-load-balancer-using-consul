@@ -14,7 +14,9 @@ public class ConsulNameResolverCheck {
     }
 
     @Test
-    public void checkConsulNameResolver() {
+    public void checkConsulNameResolver() throws Exception {
         HelloWorldClientWithNameResolver client = new HelloWorldClientWithNameResolver("emb-collection-handler", "localhost", 8500);
+
+        Thread.sleep(Long.MAX_VALUE);
     }
 }
