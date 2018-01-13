@@ -70,11 +70,7 @@ public class ConsulNameResolver extends NameResolver {
         String consulHost = uri.getHost();
         int consulPort = uri.getPort();
 
-        log.info("serviceName: [" + serviceName + "], host: [" + consulHost + "], port: [" + consulPort + "]");
-
         nodes = getServiceNodes(serviceName, consulHost, consulPort);
-        log.info("nodes: [" + nodes.size());
-
         if (nodes == null || nodes.size() == 0) {
             log.info("there is no node info for serviceName: [{}]...", serviceName);
             return;
@@ -92,7 +88,9 @@ public class ConsulNameResolver extends NameResolver {
             addrs.add(new EquivalentAddressGroup(sockaddrsList));
         }
 
-        this.listener.onAddresses(addrs, Attributes.EMPTY);
+        if(this.listener != null) {
+            this.listener.onAddresses(addrs, Attributes.EMPTY);
+        }
     }
 
     public List<ServiceDiscovery.ServiceNode> getNodes() {
@@ -177,8 +175,6 @@ public class ConsulNameResolver extends NameResolver {
         {
             this.serviceName = serviceName;
             this.pauseInSeconds = pauseInSeconds;
-
-            log.info("serviceName: {}, pauseInSeconds: {}", serviceName, pauseInSeconds);
         }
 
         @Override
