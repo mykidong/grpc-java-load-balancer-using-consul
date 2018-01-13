@@ -20,7 +20,11 @@ Consul NameResolver can be used like this:
      * @param ignoreConsul if true, consul is not used. instead, the static node list will be used.
      * @param hostPorts the static node list, for instance, Arrays.asList("host1:port1", "host2:port2")
      */
-    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, List<String> hostPorts) {
+    public HelloWorldClientWithNameResolver(String serviceName, 
+                                            String consulHost, 
+                                            int consulPort, 
+                                            boolean ignoreConsul, 
+                                            List<String> hostPorts) {
 
         String consulAddr = "consul://" + consulHost + ":" + consulPort;
 
@@ -58,8 +62,9 @@ For static service node list, in another console, run hello world client:
 
 , where Property hostPorts is comma separated hostPort list, for instance, host1:port1,host2:port2
 
-## Generated Code based
-By generating java codes with protoc, it can be used as follows.
+
+## Generated Code based    
+By generating java codes with protoc, GrpcLoadBalancer can be used as follows.
 
 ### How to use
 First, download and install protoc:
