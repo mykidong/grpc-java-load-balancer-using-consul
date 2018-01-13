@@ -47,8 +47,6 @@ public class ConsulNameResolver extends NameResolver {
 
         log.info("uri: {}, serviceName: {}", uri.toString(), serviceName);
 
-        loadServiceNodes();
-
         // run connection check timer.
         this.connectionCheckTimer = new ConnectionCheckTimer(this, this.pauseInSeconds);
         this.connectionCheckTimer.runTimer();
@@ -88,9 +86,7 @@ public class ConsulNameResolver extends NameResolver {
             addrs.add(new EquivalentAddressGroup(sockaddrsList));
         }
 
-        if(this.listener != null) {
-            this.listener.onAddresses(addrs, Attributes.EMPTY);
-        }
+        this.listener.onAddresses(addrs, Attributes.EMPTY);
     }
 
     public List<ServiceDiscovery.ServiceNode> getNodes() {

@@ -26,7 +26,7 @@ public class HelloWorldClientWithNameResolverRunner {
 
         log = LoggerFactory.getLogger(HelloWorldClientWithNameResolverRunner.class);
 
-        String serviceName = System.getProperty("serviceName");
+        String serviceName = System.getProperty("serviceName", "service-name");
         String consulHost = System.getProperty("consulHost", "localhost");
         int consulPort = Integer.valueOf(System.getProperty("consulPort", "8500"));
 
