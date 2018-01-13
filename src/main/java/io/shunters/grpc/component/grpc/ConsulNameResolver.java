@@ -47,6 +47,8 @@ public class ConsulNameResolver extends NameResolver {
 
         log.info("uri: {}, serviceName: {}", uri.toString(), serviceName);
 
+        loadServiceNodes();
+
         // run connection check timer.
         this.connectionCheckTimer = new ConnectionCheckTimer(this, this.pauseInSeconds);
         this.connectionCheckTimer.runTimer();
