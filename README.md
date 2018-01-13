@@ -10,29 +10,53 @@ There are two ways to do load balancing:
 ## Consul NameResolver Implementation
 Consul NameResolver can be used like this:
 
-    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort) {
+    /**
+     * Consul NameResolver Usage.
+     *
+     *
+     * @param serviceName consul service name.
+     * @param consulHost consul agent host.
+     * @param consulPort consul agent port.
+     * @param ignoreConsul if true, consul is not used. instead, the static node list will be used.
+     * @param hostPorts the static node list, for instance, Arrays.asList("host1:port1", "host2:port2")
+     */
+    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, List<String> hostPorts) {
 
         String consulAddr = "consul://" + consulHost + ":" + consulPort;
+
+        int pauseInSeconds = 5;
 
         channel = ManagedChannelBuilder
                 .forTarget(consulAddr)
                 .loadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance())
-                .nameResolverFactory(new ConsulNameResolver.ConsulNameResolverProvider(serviceName, 5))
+                .nameResolverFactory(new ConsulNameResolver.ConsulNameResolverProvider(serviceName, pauseInSeconds, ignoreConsul, hostPorts))
                 .usePlaintext(true)
                 .build();
 
         blockingStub = GreeterGrpc.newBlockingStub(channel);
     }
+    
+To use consul service discovery, ignoreConsul is false and hostPorts is null.
+
+and to use static service node list, ignoreConsul is true and hostPorts is the list of static nodes, for instance, Arrays.asList("host1:port1", "host2:port2")
+
+
   
 ### Run Demo
 Run hello world server:
 
     mvn -e -Dtest=HelloWorldServerRunner test;
     
-In another console, run hello world client:
+For consul usage, in another console, run hello world client:
 
-    mvn -e -Dtest=HelloWorldClientWithNameResolverRunner -DserviceName=<service-name> test;
+    mvn -e -Dtest=HelloWorldClientWithNameResolverRunner -DserviceName=<service-name> -DconsulHost=localhost -DconsulPort=8500 -DignoreConsul=false test;
+    
 
+For static service node list, in another console, run hello world client:
+
+    mvn -e -Dtest=HelloWorldClientWithNameResolverRunner -DserviceName=any-service -DconsulHost=localhost -DconsulPort=8500 -DignoreConsul=true -DhostPorts=localhost:50051 test;
+
+, where Property hostPorts is comma separated hostPort list, for instance, host1:port1,host2:port2
 
 ## Generated Code based
 By generating java codes with protoc, it can be used as follows.
