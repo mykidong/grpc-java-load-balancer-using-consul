@@ -160,6 +160,8 @@ public class ConsulNameResolver extends NameResolver {
         {
             this.serviceName = serviceName;
             this.pauseInSeconds = pauseInSeconds;
+
+            log.info("serviceName: {}, pauseInSeconds: {}", serviceName, pauseInSeconds);
         }
 
         @Override
