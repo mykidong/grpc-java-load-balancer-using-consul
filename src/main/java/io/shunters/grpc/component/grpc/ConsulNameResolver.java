@@ -65,7 +65,12 @@ public class ConsulNameResolver extends NameResolver {
     }
 
     private void loadServiceNodes() {
-        nodes = getServiceNodes(serviceName, uri.getHost(), uri.getPort());
+        String consulHost = uri.getHost();
+        int consulPort = uri.getPort();
+
+        log.info("serviceName: [" + serviceName + "], host: [" + consulHost + "], port: [" + consulPort + "]");
+
+        nodes = getServiceNodes(serviceName, consulHost, consulPort);
         log.info("nodes: [" + nodes.size());
 
         if (nodes == null || nodes.size() == 0) {
@@ -138,19 +143,25 @@ public class ConsulNameResolver extends NameResolver {
 
         @Override
         public void run() {
+            List<ServiceDiscovery.ServiceNode> nodes = consulNameResolver.getNodes();
+            if(nodes != null) {
+                for (ServiceDiscovery.ServiceNode node : consulNameResolver.getNodes()) {
+                    String host = node.getHost();
+                    int port = node.getPort();
+                    try {
+                        Socket socketClient = new Socket(host, port);
+                    } catch (IOException e) {
+                        log.error(e.getMessage());
+                        log.info("service nodes being reloaded...");
 
-            for (ServiceDiscovery.ServiceNode node : consulNameResolver.getNodes()) {
-                String host = node.getHost();
-                int port = node.getPort();
-                try {
-                    Socket socketClient = new Socket(host, port);
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                    log.info("service nodes being reloaded...");
-
-                    this.consulNameResolver.loadServiceNodes();
-                    break;
+                        this.consulNameResolver.loadServiceNodes();
+                        break;
+                    }
                 }
+            }
+            else
+            {
+                log.info("no service nodes...");
             }
         }
     }
