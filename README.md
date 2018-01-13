@@ -34,13 +34,29 @@ To construct load balancer using consul service discovery, GrpcLoadBalancer can 
     
 Or just using static node list:
 
+    // Arrays.asList("host1:port1", "host2:port2")
     // GrpcLoadBalancer(List<String> hostPorts, Class<R> rpcClass)
     lb = new GrpcLoadBalancer<>(hostPorts, GreeterGrpc.class);
+ 
+
+To get blocking stub to invoke rpc:
+
+    lb.getBlockingStub()
     
+Or to get async stub:
+
+    lb.getAsyncStub()
+   
+Please, see HelloWorldClient class for the details of how to invoke rpc.
+
 
 # Run Demo
 This demo is used with static service node list.
 
 Run hello world server:
 
-    mvn -e -Dtest=
+    mvn -e -Dtest=HelloWorldServerRunner test;
+    
+In another console, run hello world client:
+
+    mvn -e -Dtest=HelloWorldClientRunner test;
