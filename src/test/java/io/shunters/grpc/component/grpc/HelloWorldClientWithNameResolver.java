@@ -30,7 +30,11 @@ public class HelloWorldClientWithNameResolver {
      * @param ignoreConsul if true, consul is not used. instead, the static node list will be used.
      * @param hostPorts the static node list, for instance, Arrays.asList("host1:port1", "host2:port2")
      */
-    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, List<String> hostPorts) {
+    public HelloWorldClientWithNameResolver(String serviceName,
+                                            String consulHost,
+                                            int consulPort,
+                                            boolean ignoreConsul,
+                                            List<String> hostPorts) {
 
         String consulAddr = "consul://" + consulHost + ":" + consulPort;
 

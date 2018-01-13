@@ -87,6 +87,7 @@ public class ConsulNameResolver extends NameResolver {
         }
         else
         {
+            nodes = new ArrayList<>();
             for(String hostPort : this.hostPorts)
             {
                 String[] tokens = hostPort.split(":");
@@ -94,6 +95,8 @@ public class ConsulNameResolver extends NameResolver {
                 String host = tokens[0];
                 int port = Integer.valueOf(tokens[1]);
                 log.info("static host: [" + host + "], port: [" + port + "]");
+
+                nodes.add(new ServiceDiscovery.ServiceNode("", host, port));
 
                 List<SocketAddress> sockaddrsList = new ArrayList<SocketAddress>();
                 sockaddrsList.add(new InetSocketAddress(host, port));
@@ -158,7 +161,7 @@ public class ConsulNameResolver extends NameResolver {
         public void run() {
             List<ServiceDiscovery.ServiceNode> nodes = consulNameResolver.getNodes();
             if(nodes != null) {
-                for (ServiceDiscovery.ServiceNode node : consulNameResolver.getNodes()) {
+                for (ServiceDiscovery.ServiceNode node : nodes) {
                     String host = node.getHost();
                     int port = node.getPort();
                     try {
