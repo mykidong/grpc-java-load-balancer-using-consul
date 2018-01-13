@@ -3,7 +3,41 @@
 This is gRPC Java client-side load balancer, in particular for consul service discovery.
 It can also be used for the static service node list.
 
-# How to use
+There are two ways to do load balancing:
+- Consul NameResolver Implementation
+- Generated Code based
+
+## Consul NameResolver Implementation
+Consul NameResolver can be used like this:
+
+    public HelloWorldClientWithNameResolver(String serviceName, String consulHost, int consulPort) {
+
+        String consulAddr = "consul://" + consulHost + ":" + consulPort;
+
+        channel = ManagedChannelBuilder
+                .forTarget(consulAddr)
+                .loadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance())
+                .nameResolverFactory(new ConsulNameResolver.ConsulNameResolverProvider(serviceName, 5))
+                .usePlaintext(true)
+                .build();
+
+        blockingStub = GreeterGrpc.newBlockingStub(channel);
+    }
+  
+### Run Demo
+Run hello world server:
+
+    mvn -e -Dtest=HelloWorldServerRunner test;
+    
+In another console, run hello world client:
+
+    mvn -e -Dtest=HelloWorldClientWithNameResolverRunner -DserviceName=<service-name> test;
+
+
+## Generated Code based
+By generating java codes with protoc, it can be used as follows.
+
+### How to use
 First, download and install protoc:
 
     # download protoc compiler.
@@ -59,7 +93,7 @@ Or to get async stub:
 Please, see HelloWorldClient class for the details of how to invoke rpc.
 
 
-# Run Demo
+### Run Demo
 This demo is used with static service node list.
 
 Run hello world server:
