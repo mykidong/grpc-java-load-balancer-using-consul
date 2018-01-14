@@ -47,16 +47,20 @@ and to use static service node list, ignoreConsul is true and hostPorts is the l
 
   
 ### Run Demo
-Run hello world server:
-
-    mvn -e -Dtest=HelloWorldServerRunner test;
+For consul usage, run hello world server docker container.
+To register hello world server docker container with the service name to consul, see the consul-registrator or nomad if nomad is your container orchestrator.
     
-For consul usage, in another console, run hello world client:
+Run hello world client:
 
     mvn -e -Dtest=HelloWorldClientWithNameResolverRunner -DserviceName=<service-name> -DconsulHost=localhost -DconsulPort=8500 -DignoreConsul=false test;
     
 
-For static service node list, in another console, run hello world client:
+For static service node list, run hellow world server:
+
+    mvn -e -Dtest=HelloWorldServerRunner test;
+    
+    
+In another console, run hello world client:
 
     mvn -e -Dtest=HelloWorldClientWithNameResolverRunner -DserviceName=any-service -DconsulHost=localhost -DconsulPort=8500 -DignoreConsul=true -DhostPorts=localhost:50051 test;
 
@@ -123,7 +127,7 @@ Please, see HelloWorldClient class for the details of how to invoke rpc.
 
 
 ### Run Demo
-This demo is used with static service node list.
+This demo will be run for static service node list.
 
 Run hello world server:
 
