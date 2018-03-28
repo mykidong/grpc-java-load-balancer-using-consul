@@ -25,7 +25,6 @@ public class GrpcLoadBalancer<R, B, A> {
     private RoundRobin<GrpcClient<R, B, A>> roundRobin;
     private List<RoundRobin.Robin<GrpcClient<R, B, A>>> robinList;
 
-    private static final int DEFAULT_RETRY = 5;
     private static final int DEFAULT_PAUSE_IN_SECONDS = 5;
 
     ReentrantLock lock = new ReentrantLock();
@@ -36,7 +35,6 @@ public class GrpcLoadBalancer<R, B, A> {
     private boolean ignoreConsul;
     private Class<R> rpcClass;
     private List<String> hostPorts;
-    private int retry;
     private int pauseInSeconds;
 
     private ConnectionCheckTimer<R, B, A> connectionCheckTimer;
@@ -49,14 +47,12 @@ public class GrpcLoadBalancer<R, B, A> {
      * @param consulPort
      * @param rpcClass
      */
-    public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, Class<R> rpcClass)
-    {
-        this(serviceName, consulHost, consulPort, false, rpcClass, DEFAULT_RETRY, DEFAULT_PAUSE_IN_SECONDS, null);
+    public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, Class<R> rpcClass) {
+        this(serviceName, consulHost, consulPort, false, rpcClass, DEFAULT_PAUSE_IN_SECONDS, null);
     }
 
-    public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, Class<R> rpcClass, int retry, int pauseInSeconds)
-    {
-        this(serviceName, consulHost, consulPort, false, rpcClass, retry, pauseInSeconds, null);
+    public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, Class<R> rpcClass, int pauseInSeconds) {
+        this(serviceName, consulHost, consulPort, false, rpcClass, pauseInSeconds, null);
     }
 
     /**
@@ -65,30 +61,26 @@ public class GrpcLoadBalancer<R, B, A> {
      * @param hostPorts
      * @param rpcClass
      */
-    public GrpcLoadBalancer(List<String> hostPorts, Class<R> rpcClass)
-    {
-        this(null, null, -1, true, rpcClass, DEFAULT_RETRY, DEFAULT_PAUSE_IN_SECONDS, hostPorts);
+    public GrpcLoadBalancer(List<String> hostPorts, Class<R> rpcClass) {
+        this(null, null, -1, true, rpcClass, DEFAULT_PAUSE_IN_SECONDS, hostPorts);
     }
 
-    public GrpcLoadBalancer(List<String> hostPorts, Class<R> rpcClass, int retry, int pauseInSeconds)
-    {
-        this(null, null, -1, true, rpcClass, retry, pauseInSeconds, hostPorts);
+    public GrpcLoadBalancer(List<String> hostPorts, Class<R> rpcClass, int pauseInSeconds) {
+        this(null, null, -1, true, rpcClass, pauseInSeconds, hostPorts);
     }
-
 
 
     public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, Class<R> rpcClass, List<String> hostPorts) {
-        this(serviceName, consulHost, consulPort, ignoreConsul, rpcClass, DEFAULT_RETRY, DEFAULT_PAUSE_IN_SECONDS, hostPorts);
+        this(serviceName, consulHost, consulPort, ignoreConsul, rpcClass, DEFAULT_PAUSE_IN_SECONDS, hostPorts);
     }
 
-    public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, Class<R> rpcClass, int retry, int pauseInSeconds, List<String> hostPorts) {
+    public GrpcLoadBalancer(String serviceName, String consulHost, int consulPort, boolean ignoreConsul, Class<R> rpcClass, int pauseInSeconds, List<String> hostPorts) {
         this.serviceName = serviceName;
         this.consulHost = consulHost;
         this.consulPort = consulPort;
         this.ignoreConsul = ignoreConsul;
         this.rpcClass = rpcClass;
         this.hostPorts = hostPorts;
-        this.retry = retry;
         this.pauseInSeconds = pauseInSeconds;
 
         loadServiceNodes();
@@ -105,19 +97,13 @@ public class GrpcLoadBalancer<R, B, A> {
             if (!ignoreConsul) {
 
                 List<ServiceDiscovery.ServiceNode> nodes = null;
-                for (int i = 0; i < retry; i++) {
+                while (true) {
                     nodes = getServiceNodes(serviceName, consulHost, consulPort);
 
                     if (nodes == null || nodes.size() == 0) {
                         log.info("there is no node info for serviceName: [{}]...", serviceName);
 
-                        if (i == retry - 1) {
-                            log.info("even if retry: [{}] executed, there is no node info for serviceName: [{}]...", retry, serviceName);
-
-                            throw new RuntimeException("Service Node Not Found!");
-                        }
-
-                        TimeUtils.pause(pauseInSeconds * 1000 * 1000 * 1000);
+                        TimeUtils.sleep(pauseInSeconds * 1000);
                     } else {
                         break;
                     }
@@ -134,7 +120,7 @@ public class GrpcLoadBalancer<R, B, A> {
                     robinList.add(new RoundRobin.Robin(client));
                 }
             } else {
-                for(String hostPort : hostPorts) {
+                for (String hostPort : hostPorts) {
                     String[] tokens = hostPort.split(":");
 
                     GrpcClient<R, B, A> client = new GrpcClient<>(tokens[0], Integer.valueOf(tokens[1]), rpcClass);
